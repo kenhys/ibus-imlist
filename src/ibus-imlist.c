@@ -13,14 +13,8 @@ static GOptionEntry entries[] = {
   { NULL }
 };
 
-void list_input_method(void)
+void list_input_method(IBusConfig *config)
 {
-  ibus_init();
-
-  IBusBus *bus = ibus_bus_new();
-  g_object_ref_sink(bus);
-
-  IBusConfig *config = ibus_bus_get_config(bus);
   GVariant *variant = NULL;
   variant = ibus_config_get_value(config, "general", "preload-engines");
 
@@ -67,8 +61,14 @@ int main(int argc, char *argv[])
     exit(1);
   }
 
-  if (list) {
-    list_input_method();
+  if (list || setlist) {
+    ibus_init();
+
+    IBusBus *bus = ibus_bus_new();
+    g_object_ref_sink(bus);
+
+    IBusConfig *config = ibus_bus_get_config(bus);
+    list_input_method(config);
   } else {
     g_print("%s", g_option_context_get_help(context, TRUE, NULL));
   }
