@@ -3,10 +3,13 @@
 #include <ibus.h>
 
 static gchar *list;
+static gchar *setlist;
 
 static GOptionEntry entries[] = {
   { "list", 'l', 0, G_OPTION_ARG_NONE, &list,
     "List input method", NULL },
+  { "set", 's', 0, G_OPTION_ARG_STRING, &setlist,
+    "Set input method list separated by ',' for multiple IM", NULL },
   { NULL }
 };
 
@@ -31,6 +34,24 @@ void list_input_method(void)
     g_variant_unref(item);
   }
   g_variant_unref(variant);
+}
+
+void set_input_method(IBusConfig *config)
+{
+  GVariantBuilder *builder;
+  GVariant *variant;
+  builder = g_variant_builder_new(G_VARIANT_TYPE ("as"));
+  gchar **items = g_strsplit(setlist, ",", -1);
+  gint i = 0;
+  while (items[i]) {
+    g_variant_builder_add(builder, "s", items[i]);
+    i++;
+  }
+  //g_variant_builder_add(builder, "s", "mozc-jp");
+  //g_variant_builder_add (builder, "s", "xkb:us::eng");
+  variant = g_variant_new ("as", builder);
+  g_variant_builder_unref (builder);
+  ibus_config_set_value(config, "general", "preload-engines", variant);
 }
 
 int main(int argc, char *argv[])
