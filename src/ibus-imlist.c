@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ibus.h>
+#include <glib.h>
 
 static gchar *list;
 static gchar *setlist;
@@ -38,11 +39,17 @@ void set_input_method(IBusConfig *config)
   gchar **items = g_strsplit(setlist, ",", -1);
   gint i = 0;
   while (items[i]) {
-    g_variant_builder_add(builder, "s", items[i]);
+    g_debug("%s\n", items[i]);
+    if (!g_strcmp0(items[i], "us")) {
+      g_variant_builder_add(builder, "s", "xkb:us::eng");
+    } else if (!g_strcmp0(items[i], "jp")) {
+      g_variant_builder_add(builder, "s", "xkb:jp::jpn");
+    } else {
+      g_variant_builder_add(builder, "s", items[i]);
+    }
     i++;
   }
-  //g_variant_builder_add(builder, "s", "mozc-jp");
-  //g_variant_builder_add (builder, "s", "xkb:us::eng");
+  g_strfreev(items);
   variant = g_variant_new ("as", builder);
   g_variant_builder_unref (builder);
   ibus_config_set_value(config, "general", "preload-engines", variant);
@@ -68,7 +75,11 @@ int main(int argc, char *argv[])
     g_object_ref_sink(bus);
 
     IBusConfig *config = ibus_bus_get_config(bus);
-    list_input_method(config);
+    if (list) {
+      list_input_method(config);
+    } else if (setlist) {
+      set_input_method(config);
+    }
   } else {
     g_print("%s", g_option_context_get_help(context, TRUE, NULL));
   }
