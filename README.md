@@ -23,3 +23,9 @@ It is a bit complicated, so I wrote a demo program which use IBus API.
 Use `-l` option to list input methods which is enabled.
 
     % ibus-imlist -l
+
+## How to change the order of input methods?
+
+Use `-s` option with input methods list to change the order.
+
+    % ibus-imlist -s mozc-jp,us
